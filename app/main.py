@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database.engine import create_db_and_tables
+from app.openapi import build_secure_openapi
 from app.routes import admin, appointments, auth, availability, health, reception
 from app.security.middleware import (
     JWTContextMiddleware,
@@ -49,3 +50,10 @@ app.include_router(appointments.router, prefix="/api/v1")
 app.include_router(availability.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
 app.include_router(reception.router)
+
+
+def custom_openapi():
+    return build_secure_openapi(app)
+
+
+app.openapi = custom_openapi
