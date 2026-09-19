@@ -1,0 +1,89 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "f126e6b6d67f0331adfd1e699cabf4de11cc6a4a0ef0b7d5b2fa6a7ee499b6f1"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "0030def1047a8e1bf3685442b8c017bda6508a20ef64b7e5ff55fcbc915f61b9"
+      }
+    ],
+    "completedAt": "2026-09-19T20:11:34.381686Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "aeac8413-9e21-431d-8191-2e11f2fe75c2",
+    "preservedSources": {
+      "checkpoints/373a89c271569518192a9965b81bb2b67240f1251140cba6b587bb93527c004d.json": "9d7af349021cc3f0a7f06894f798c432bfba4042b4845d7add797933000e3784",
+      "checkpoints/62a0fee170b2f8a7e08e68aae4774895c61dfeacb8305f8d4d26be5fd824451a.json": "62a0fee170b2f8a7e08e68aae4774895c61dfeacb8305f8d4d26be5fd824451a",
+      "checkpoints/ffbedcb1b4c6d4ff9f98e6289026cc54bb4297775e735b8412aa610383525b1d.json": "66785221590ac3bc572a0228b91fcf755259df8946c191f497a7ae8a615dc623"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.24"
+    },
+    "scope": {
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No independent delegated baseline was permitted.",
+        "No production infrastructure configuration was available."
+      ],
+      "runtimeStatus": "Static source review only; no vulnerability-triggering runtime inputs were executed during the scan.",
+      "summary": "Complete static review of authored executable source, tests that establish security behavior, dependency manifests, environment template, and repository security policy.",
+      "validationMode": "Source-backed sequential baseline and focused investigation."
+    },
+    "sealedAt": "2026-09-19T20:11:34.381686Z",
+    "startedAt": "2026-09-19T20:07:20.679550Z",
+    "status": "completed",
+    "target": {
+      "displayName": "nathalia_artigas_DR2_AT",
+      "kind": "directory_snapshot",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:06d08d93a36a357ad26e7b387c337121bd44830822f16fbee728997e14a68e55",
+      "targetId": "target_sha256_834f8ea84ec8b8be108d716d0ff622c0b00bfac17d8ed26a581b9badab02e83e"
+    },
+    "threatModel": {
+      "assets": [
+        "Patient identity and health-related scheduling data",
+        "Appointment integrity and availability",
+        "Human passwords and JWT authority",
+        "Laboratory client secret and restricted service scope"
+      ],
+      "assumptions": [
+        "Current SQLite deployment is development-only",
+        "TLS is expected at a future reverse proxy but no manifest proves it",
+        "MFA is intentionally simulated for the academic exercise",
+        "Documents and generated environments are excluded from executable-source coverage"
+      ],
+      "attackerCapabilities": [
+        "Unauthenticated clients can reach both token endpoints",
+        "Authenticated professionals control appointment identifiers and public notes",
+        "A token thief may possess a valid pre-deactivation JWT",
+        "Attackers do not initially control database, JWT key, host, or administrator account"
+      ],
+      "securityObjectives": [
+        "Enforce role, scope, MFA, and ownership for every protected object",
+        "Permit rapid revocation of compromised identities",
+        "Bound expensive authentication work",
+        "Never expose clinical data to M2M clients",
+        "Encode HTML and parameterize database access",
+        "Apply explicit browser and transport hardening"
+      ],
+      "summary": "FastAPI healthcare scheduling API with human JWT sessions, a scoped M2M availability endpoint, Jinja2 reception HTML, SQLModel persistence, and no supplied production edge configuration.",
+      "trustBoundaries": [
+        "Untrusted HTTP clients to FastAPI",
+        "JWT claims to current application authority",
+        "FastAPI to SQLModel database",
+        "Persisted user content to reception browser",
+        "Laboratory client to availability-only service surface"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

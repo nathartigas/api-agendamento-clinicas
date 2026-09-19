@@ -1,0 +1,72 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": ".venv/**",
+      "reason": "Third-party installed dependencies, not authored product source."
+    },
+    {
+      "pattern": "data/**",
+      "reason": "Generated local database artifacts; contents were not inspected."
+    },
+    {
+      "pattern": "docs/**",
+      "reason": "Narrative assessment artifacts used as context, not executable product source."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "directory",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "No production reverse-proxy or infrastructure manifest was supplied, so compensating headers and distributed rate limits could not be verified."
+    },
+    {
+      "question": "An independent baseline worker was unavailable because delegation was not authorized; the audit used sequential baseline and focused passes."
+    }
+  ],
+  "scanId": "aeac8413-9e21-431d-8191-2e11f2fe75c2",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface-auth-endpoints",
+      "label": "Human and M2M token issuance",
+      "notes": "Unlimited attempts affect both sibling token endpoints.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface-token-lifecycle",
+      "label": "JWT validation and identity revocation",
+      "notes": "Signature and expiry are enforced; current active state is not.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface-http-hardening",
+      "label": "FastAPI response and browser hardening",
+      "notes": "Required security headers are absent; CORS is absent rather than permissive.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface-object-authorization",
+      "label": "Appointment RBAC, scopes, and ownership",
+      "notes": "BOLA was present in the stage-1 baseline but current routes call centralized ownership checks; cross-professional access is tested.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface-injection-output",
+      "label": "SQL construction, Pydantic contracts, and Jinja output",
+      "notes": "SQLModel parameterization, extra=forbid, response models, and Jinja autoescape provide source-backed counterevidence; stricter text whitelist remains defense in depth.",
+      "receiptRefs": []
+    }
+  ]
+}

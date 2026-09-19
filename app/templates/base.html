@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Agenda da clínica{% endblock %}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; color: #17202a; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #d5d8dc; padding: .7rem; text-align: left; }
+      th { background: #eaf2f8; }
+      .empty { padding: 1rem; background: #f4f6f7; }
+    </style>
+  </head>
+  <body>
+    <header><h1>Rede de Clínicas — Agenda</h1></header>
+    <main>{% block content %}{% endblock %}</main>
+  </body>
+</html>
+

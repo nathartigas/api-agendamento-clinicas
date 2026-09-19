@@ -1,0 +1,378 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "user-token-unlimited",
+            "client-token-unlimited"
+          ],
+          "outcome": "credential compromise or degraded availability",
+          "sink": "bcrypt check",
+          "source": "unauthenticated request",
+          "summary": "HTTP form or Basic credentials -> token route -> bcrypt verification"
+        },
+        "impact": {
+          "level": "high",
+          "why": "A guessed professional credential exposes health scheduling data; high-volume bcrypt work can also disrupt appointment operations."
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "Credential stuffing and request flooding require only network reachability."
+        },
+        "reachability": {
+          "attacker": "remote unauthenticated client",
+          "entrypoint": "/api/v1/auth/token and /api/v1/auth/client-token",
+          "outcome": "unbounded authentication work",
+          "summary": "Both endpoints are public by design and require no prior token."
+        },
+        "summary": "An unauthenticated network client repeatedly posts passwords, MFA codes, or client secrets until credentials succeed or bcrypt work consumes available workers."
+      },
+      "codeEvidence": [
+        {
+          "code": "@router.post(\"/token\", response_model=TokenResponse)\ndef issue_user_token(...):\n    user = authenticate_user(session, username, password)\n    if user is None:\n        raise _unauthorized()",
+          "endLine": 40,
+          "explanation": "Attacker-controlled credentials reach bcrypt verification on every request; no rate dependency, cooldown, or lockout is present.",
+          "id": "user-token-unlimited",
+          "label": "Password endpoint directly verifies every request",
+          "language": "python",
+          "path": "app/routes/auth.py",
+          "role": "root_control",
+          "startLine": 28
+        },
+        {
+          "code": "@router.post(\"/client-token\", response_model=TokenResponse)\ndef issue_client_token(...):\n    client = authenticate_client(session, credentials.username, credentials.password)\n    if client is None:\n        raise _unauthorized()",
+          "endLine": 79,
+          "explanation": "The laboratory secret can also be guessed without a request budget, and every attempt performs an expensive bcrypt check.",
+          "id": "client-token-unlimited",
+          "label": "Client Credentials endpoint shares the same missing limit",
+          "language": "python",
+          "path": "app/routes/auth.py",
+          "role": "root_control",
+          "startLine": 69
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Both externally reachable token handlers invoke bcrypt-backed authentication without any application-level request limiter or lockout."
+      },
+      "findingId": "csf_12ffb76570f3e9424e9cd13c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:548839451759e031b9298c1c0fa1d7fa179b1fb8fefcb8e35ddf67cbf0f54be8"
+      },
+      "identity": {
+        "anchor": "unlimited-token-attempts-permit-credential-attacks-and-bcrypt-resource-exhaustion"
+      },
+      "locations": [
+        {
+          "endLine": 40,
+          "path": "app/routes/auth.py",
+          "role": "root_control",
+          "startLine": 28
+        },
+        {
+          "endLine": 79,
+          "path": "app/routes/auth.py",
+          "role": "root_control",
+          "startLine": 69
+        }
+      ],
+      "occurrenceId": "occ_18deb7e57669a97e65d38bad",
+      "preventiveControls": [
+        "Define every public route's resource budget centrally and alert on repeated authentication failures."
+      ],
+      "provenance": {
+        "candidateId": "candidate-rate-limit",
+        "source": "local_plugin"
+      },
+      "remediation": "Apply centralized per-client rate limits with stricter budgets for human and M2M token endpoints, return 429 with Retry-After, and use a distributed limiter at production scale.",
+      "remediationTests": [
+        "Send attempts up to the login budget and assert the next request receives 429.",
+        "Verify ordinary API routes use a higher request budget."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "user-token-unlimited",
+          "client-token-unlimited"
+        ],
+        "summary": "The token routes enforce credential correctness but no consumption policy. Because bcrypt intentionally costs CPU, an attacker can combine credential guessing with application-level resource exhaustion."
+      },
+      "ruleId": "authentication.missing-rate-limit",
+      "severity": {
+        "level": "high",
+        "score": 8.1,
+        "scoringSystem": "CVSS:3.1"
+      },
+      "summary": "Remote clients can submit unlimited password, MFA, and client-secret guesses to both token endpoints, enabling credential stuffing and CPU exhaustion against the healthcare API.",
+      "taxonomy": {
+        "category": "OWASP API4:2023 Unrestricted Resource Consumption / API2:2023 Broken Authentication",
+        "cwe": [
+          "CWE-307",
+          "CWE-400"
+        ]
+      },
+      "title": "Unlimited token attempts permit credential attacks and bcrypt resource exhaustion",
+      "validation": {
+        "assertions": [
+          "Every syntactically valid attempt reaches authentication.",
+          "The same missing control affects the unlisted M2M sibling endpoint."
+        ],
+        "evidenceRefs": [
+          "user-token-unlimited",
+          "client-token-unlimited"
+        ],
+        "limitations": [
+          "No load test was run against the development machine."
+        ],
+        "method": "static source trace",
+        "summary": "The route dependencies and application middleware were reviewed; neither endpoint has a limiter and `app/main.py` installs no rate-limiting middleware."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "jwt-only-principal",
+            "revocation-flags"
+          ],
+          "outcome": "continued access after administrative revocation",
+          "sink": "authorized API operation",
+          "source": "valid pre-deactivation bearer token",
+          "summary": "previously issued JWT -> signature validation -> claims-only Principal -> protected route"
+        },
+        "impact": {
+          "level": "high",
+          "why": "The residual token can read protected scheduling data within its existing role and ownership."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The path depends on prior token issuance or theft and a later deactivation event."
+        },
+        "reachability": {
+          "attacker": "disabled account holder or token thief",
+          "entrypoint": "any protected Bearer route",
+          "outcome": "continued access during the residual session window",
+          "summary": "Requires a still-unexpired token; no administrator privilege is required after the token has been obtained."
+        },
+        "summary": "A user or service obtains a token, is disabled after suspected compromise, and continues calling protected routes until `exp`."
+      },
+      "codeEvidence": [
+        {
+          "code": "def get_current_principal(security_scopes, token):\n    payload = decode_access_token(token)\n    token_scopes = frozenset(payload.get(\"scope\", \"\").split())\n    ...\n    return Principal(subject=str(payload[\"sub\"]), token_type=payload[\"token_type\"], role=payload.get(\"role\"), ...)",
+          "endLine": 66,
+          "explanation": "A valid signature is treated as sufficient current authority; the user/client record is never loaded after token issuance.",
+          "id": "jwt-only-principal",
+          "label": "Principal is reconstructed only from JWT claims",
+          "language": "python",
+          "path": "app/security/authentication.py",
+          "role": "root_control",
+          "startLine": 44
+        },
+        {
+          "code": "is_active: bool = Field(default=True)\n...\nclass OAuthClient(SQLModel, table=True):\n    ...\n    is_active: bool = Field(default=True)",
+          "endLine": 35,
+          "explanation": "The data model provides a revocation decision, but protected requests do not consult it.",
+          "id": "revocation-flags",
+          "label": "Persistent identities already expose active-state flags",
+          "language": "python",
+          "path": "app/models/user.py",
+          "role": "expected_control",
+          "startLine": 22
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The principal builder has no database dependency while both persistent identity models expose an `is_active` revocation flag."
+      },
+      "findingId": "csf_de8e12648c2f65c14fc587ef",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a811beb583bdcc335b593d6aa869f9107818fa55a2c6181121d2b3cdc9c959ef"
+      },
+      "identity": {
+        "anchor": "disabled-users-and-oauth-clients-retain-access-until-jwt-expiry"
+      },
+      "locations": [
+        {
+          "endLine": 66,
+          "path": "app/security/authentication.py",
+          "role": "root_control",
+          "startLine": 44
+        },
+        {
+          "endLine": 24,
+          "path": "app/models/user.py",
+          "role": "expected_control",
+          "startLine": 22
+        },
+        {
+          "endLine": 35,
+          "path": "app/models/user.py",
+          "role": "expected_control",
+          "startLine": 35
+        }
+      ],
+      "occurrenceId": "occ_a9e15f6613d6c904b65448e0",
+      "preventiveControls": [
+        "Add a token-version or revocation mechanism if immediate per-token invalidation is required beyond account status."
+      ],
+      "provenance": {
+        "candidateId": "candidate-stale-principal",
+        "source": "local_plugin"
+      },
+      "remediation": "Resolve the token subject against the database on protected requests, reject inactive or missing users and clients, and verify role, professional link, and allowed scopes still match current state.",
+      "remediationTests": [
+        "Issue a token, deactivate its user, and assert the next protected request returns 401.",
+        "Repeat for a disabled OAuth client."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "jwt-only-principal",
+          "revocation-flags"
+        ],
+        "summary": "The authorization boundary uses a self-contained JWT but omits a current-state lookup. Disabling an identity affects future token issuance only, not already-issued bearer tokens."
+      },
+      "ruleId": "authentication.stale-jwt-principal",
+      "severity": {
+        "level": "medium",
+        "score": 6.5,
+        "scoringSystem": "CVSS:3.1"
+      },
+      "summary": "Bearer-token validation trusts identity, role, ownership attributes, and scopes from the signed JWT without checking whether the backing user or OAuth client remains active.",
+      "taxonomy": {
+        "category": "OWASP API2:2023 Broken Authentication",
+        "cwe": [
+          "CWE-613",
+          "CWE-284"
+        ]
+      },
+      "title": "Disabled users and OAuth clients retain access until JWT expiry",
+      "validation": {
+        "assertions": [
+          "A previously issued token remains cryptographically valid for the configured 30-minute lifetime after deactivation."
+        ],
+        "evidenceRefs": [
+          "jwt-only-principal",
+          "revocation-flags"
+        ],
+        "limitations": [
+          "Exploitation requires possession of a token issued before deactivation."
+        ],
+        "method": "static source trace",
+        "summary": "Token issuance checks `is_active`, while protected-request principal construction does not query either identity table."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "no-security-middleware"
+          ],
+          "outcome": "missing clickjacking and transport defense",
+          "sink": "browser security policy",
+          "source": "browser navigation",
+          "summary": "HTTP request -> FastAPI route -> response without hardening headers"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Framing or downgrade-related conditions can support attacks on an authenticated clinical workflow."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Exploitability depends on browser session behavior and deployment topology not present in the repository."
+        },
+        "reachability": {
+          "attacker": "remote web attacker",
+          "entrypoint": "reception HTML or any API response",
+          "outcome": "weaker browser and transport protections",
+          "summary": "Requires the application to be deployed without a compensating edge policy."
+        },
+        "summary": "A browser visits the reception view through a deployment lacking compensating proxy headers; an attacker can frame the page or benefit from weaker transport/content-type policy."
+      },
+      "codeEvidence": [
+        {
+          "code": "app = FastAPI(...)\napp.include_router(health.router)\napp.include_router(auth.router, prefix=\"/api/v1\")\napp.include_router(appointments.router, prefix=\"/api/v1\")\napp.include_router(reception.router)",
+          "endLine": 29,
+          "explanation": "No middleware or response hook adds Strict-Transport-Security, X-Frame-Options, or X-Content-Type-Options.",
+          "id": "no-security-middleware",
+          "label": "Application registers routers without response hardening",
+          "language": "python",
+          "path": "app/main.py",
+          "role": "root_control",
+          "startLine": 17
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Application construction installs no response-security middleware and the repository contains no proxy or deployment manifest that supplies the headers."
+      },
+      "findingId": "csf_3d294fbf10c2c746d6d3e69f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:cf726c5dc120fc2eb36657daf5ec8badf09a83f5b06a9a3c2a33edf596127ac6"
+      },
+      "identity": {
+        "anchor": "responses-omit-required-transport-and-browser-hardening-headers"
+      },
+      "locations": [
+        {
+          "endLine": 29,
+          "path": "app/main.py",
+          "role": "root_control",
+          "startLine": 17
+        }
+      ],
+      "occurrenceId": "occ_03c418b481ff072a27371f8b",
+      "preventiveControls": [
+        "Keep a single header policy in application middleware and verify equivalent edge configuration during deployment."
+      ],
+      "provenance": {
+        "candidateId": "candidate-security-headers",
+        "source": "local_plugin"
+      },
+      "remediation": "Add centralized middleware that sets HSTS, X-Frame-Options: DENY, and X-Content-Type-Options: nosniff on every response, with production TLS enforced at the edge.",
+      "remediationTests": [
+        "Assert all representative JSON and HTML responses include the three required headers."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "no-security-middleware"
+        ],
+        "summary": "HTTP hardening is neither application-owned nor defined in a deployment manifest, so every response lacks the required defense-in-depth headers in the current runnable configuration."
+      },
+      "ruleId": "http.missing-security-headers",
+      "severity": {
+        "level": "low",
+        "score": 3.7,
+        "scoringSystem": "CVSS:3.1"
+      },
+      "summary": "The FastAPI application returns API and reception HTML responses without HSTS, frame restrictions, or MIME-sniffing protection, leaving deployment safety dependent on undocumented external infrastructure.",
+      "taxonomy": {
+        "category": "OWASP API8:2023 Security Misconfiguration",
+        "cwe": [
+          "CWE-693",
+          "CWE-1021"
+        ]
+      },
+      "title": "Responses omit required transport and browser hardening headers",
+      "validation": {
+        "assertions": [
+          "Reception HTML can be framed.",
+          "Clients receive no application-declared HSTS or nosniff policy."
+        ],
+        "evidenceRefs": [
+          "no-security-middleware"
+        ],
+        "limitations": [
+          "An external production proxy could add these headers, but no such configuration was supplied."
+        ],
+        "method": "static configuration review",
+        "summary": "All application setup and root configuration files were reviewed; no alternate header-enforcement layer exists in the repository."
+      }
+    }
+  ],
+  "scanId": "aeac8413-9e21-431d-8191-2e11f2fe75c2",
+  "schemaVersion": "1.0"
+}

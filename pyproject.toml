@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nathalia-artigas-dr2-at"
+version = "0.1.0"
+description = "API segura de agendamento de consultas médicas"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.115,<1.0",
+  "uvicorn[standard]>=0.30,<1.0",
+  "sqlmodel>=0.0.22,<1.0",
+  "pydantic-settings>=2.6,<3.0",
+  "jinja2>=3.1,<4.0",
+  "python-multipart>=0.0.12,<1.0",
+  "bcrypt>=4.2,<6.0",
+  "PyJWT>=2.10,<3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9.0",
+  "pytest-cov>=6.0,<7.0",
+  "httpx>=0.27,<1.0",
+  "ruff>=0.8,<1.0",
+  "bandit>=1.7,<2.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+skips = ["B101"]
