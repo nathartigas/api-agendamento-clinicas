@@ -3,7 +3,7 @@
 **Projeto:** API de Agendamento de Consultas  
 **Autora:** Nathalia Artigas  
 **Assessment:** DR2 - Segurança de Software  
-**Versão auditada:** `a45003559f2a808d2e11a6e11f6c120c5745d56a`  
+**Snapshot auditado (`app/`, `tests/`, `scripts/`):** `sha256:bf98f1901b64a05e79f7b1ccadd6ab77d8d8f46f6816eddd9936f3709af45cb6`
 **Pull Request:** https://github.com/nathartigas/api-agendamento-clinicas/pull/3  
 **Pipeline final de correção:** https://github.com/nathartigas/api-agendamento-clinicas/actions/runs/35517319082
 
@@ -176,3 +176,10 @@ python -m scripts.audit_openapi --output reports/openapi-audit.json
 
 Nenhuma credencial real, `.env`, banco local, cache ou ambiente virtual deve integrar o ZIP final.
 
+## 11. Conferência da rubrica
+
+Os 24 critérios da rubrica foram revistos individualmente. A matriz
+`docs/matriz_rubrica.md` aponta, para cada item, a implementação, a evidência objetiva e a forma de
+reprodução. O resultado da auditoria é 24/24 critérios demonstrados. O vídeo não listado continua
+sendo a única evidência externa que depende da autora e deve ter sua URL registrada em
+`VIDEO_LINK.txt` antes da geração do ZIP definitivo.

@@ -138,8 +138,8 @@ validação formal.
 
 ### Superfícies condicionais privilegiadas
 
-- Pipeline e deploy: ainda não implementados; futuramente tokens de CI devem ter permissões
-  mínimas e jobs de pull request não acessam segredos de produção.
+- Pipeline: implementado com `contents: read`, checkout sem persistência de credenciais, actions e
+  imagem ZAP fixadas e nenhum segredo de produção em pull requests. O deploy continua ausente.
 - Administração: MFA é requisito, mas não transforma operações administrativas em não auditáveis.
 - Backup/restauração: restauração é operação privilegiada e deve validar destino, versão e
   autorização antes de substituir dados.
@@ -211,4 +211,4 @@ infraestrutura continuam bloqueando produção: banco local, rate limit por proc
 ausência de TLS comprovado, auditoria append-only, cofre de segredos e backup testado.
 
 Repository: local:nathalia_artigas_DR2_AT
-Version: sha256:fabfd411ccb6b72f9a2c47b27964e2e304b09666dc5536f8f1daad0e1df8e9cf
+Version: sha256:bf98f1901b64a05e79f7b1ccadd6ab77d8d8f46f6816eddd9936f3709af45cb6

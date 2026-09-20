@@ -50,14 +50,14 @@ flowchart LR
 
 | Fluxo | Dados | Classificação | Controle implementado | Controle ainda necessário |
 |---|---|---|---|---|
-| F1 | Payloads de consulta, credenciais e tokens | Muito alta | Pydantic, JWT e HTTPS assumido no deploy | CORS e limites |
-| F2 | Credencial M2M e pedido de disponibilidade | Segredo/operacional | Não implementado | Client Credentials, escopo e rotação |
-| F3 | Requisição encaminhada | Sensível | Não implementado | TLS externo, rede privada e headers |
+| F1 | Payloads de consulta, credenciais e tokens | Muito alta | Pydantic, JWT, CORS e limites; HTTPS exigido no deploy | TLS comprovado na borda |
+| F2 | Credencial M2M e pedido de disponibilidade | Segredo/operacional | Client Credentials, escopo e token de serviço | Rotação operacional do segredo |
+| F3 | Requisição encaminhada | Sensível | Headers de segurança e negação por padrão | TLS externo e rede privada comprovados |
 | F4/F5 | JWT, claims, papel e ownership | Muito alta | Assinatura, expiração, audience e autorização central | Revogação e IdP de produção |
 | F6 | IDs, horário e observação | Dado de saúde | Schema fechado e timezone | Whitelist de texto e regras de negócio |
 | F7/F8 | Dados persistidos | Muito alta | SQLModel parametrizado e sessão injetada | Banco produtivo, least privilege e criptografia |
-| F9 | Resposta JSON | Dado de saúde mínimo | `response_model` explícito | Autorização por objeto |
-| F10/F11 | Agenda nominal e observação | Muito alta | Filtro diário e autoescape | Sessão de recepção e minimização adicional |
+| F9 | Resposta JSON | Dado de saúde mínimo | `response_model` e autorização por objeto | Revisão contínua do contrato |
+| F10/F11 | Agenda nominal e observação | Muito alta | JWT, papel, filtro diário, autoescape e CSP | Isolamento adicional por clínica |
 | F12 | Quem fez o quê e quando | Interno restrito | Não implementado | Integridade, retenção e acesso restrito |
 
 ## Trust boundaries

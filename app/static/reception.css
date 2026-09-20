@@ -1,0 +1,26 @@
+body {
+  color: #17202a;
+  font-family: system-ui, sans-serif;
+  margin: 2rem;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #d5d8dc;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+th {
+  background: #eaf2f8;
+}
+
+.empty {
+  background: #f4f6f7;
+  padding: 1rem;
+}
