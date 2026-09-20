@@ -136,3 +136,19 @@ permita acesso indevido a dados de saúde.
 A justificativa das fases está em `docs/devsecops_pipeline.md`, a priorização em
 `docs/cvss_priorizacao.md`, a rastreabilidade dos testes em
 `docs/estrategia_testes_seguranca.md` e as evidências em `docs/evidencias/etapa_5.md`.
+
+## Etapa 6 — capstone e auditoria final
+
+O Exercício 13 conclui a aplicação com testes unitários usando mocking, auditoria reproduzível do
+OpenAPI, execução passiva do OWASP ZAP e relatório de rastreabilidade. A primeira execução do ZAP
+encontrou problemas de hardening na Swagger UI; depois das correções de CSP, SRI, políticas
+cross-origin, permissões e cache, o scan final ficou sem alertas altos, médios ou baixos.
+
+Resultado final local: 34 testes, 94,64% de cobertura, Ruff aprovado e 6/6 controles OpenAPI. O
+pipeline após correção concluiu testes, Bandit, Trivy, ZAP e security gate com sucesso.
+
+- relatório: `docs/relatorio_final_rastreabilidade.md`;
+- evidências: `docs/evidencias/etapa_6.md`;
+- ZAP antes/depois: `docs/evidencias/zap_before_hardening/` e `docs/evidencias/zap/`;
+- roteiro do vídeo: `docs/roteiro_video.md`;
+- link do vídeo: `VIDEO_LINK.txt` (deve ser preenchido antes do ZIP definitivo).

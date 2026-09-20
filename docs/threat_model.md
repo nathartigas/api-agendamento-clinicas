@@ -197,5 +197,18 @@ dependências e DAST passivo, e o job agregador bloqueia o merge quando um contr
 falha. Os limiares técnicos e os elevadores de impacto de negócio estão documentados em
 `docs/cvss_priorizacao.md`.
 
+## 7. Atualização da etapa 6
+
+O capstone validou o contrato OpenAPI com seis controles automatizados e executou duas varreduras
+passivas OWASP ZAP. A primeira apontou dois alertas médios e cinco baixos na Swagger UI. O
+hardening adicionou CSP completa, SRI com dependências versionadas, COEP, COOP, CORP, Permissions
+Policy e prevenção de cache. A varredura de verificação não encontrou alerta alto, médio ou baixo;
+restaram somente duas observações informativas.
+
+TM-08 e riscos de configuração no browser receberam defesa adicional. TM-01, TM-02, TM-04 e TM-09
+também passaram a ter verificação no OpenAPI ou testes com mocking. Os riscos residuais de
+infraestrutura continuam bloqueando produção: banco local, rate limit por processo, MFA simulado,
+ausência de TLS comprovado, auditoria append-only, cofre de segredos e backup testado.
+
 Repository: local:nathalia_artigas_DR2_AT
-Version: sha256:367744b5c8476fdf2941aa2967a455c4efb0b3e625f60ff60a59a5252698338e
+Version: sha256:fabfd411ccb6b72f9a2c47b27964e2e304b09666dc5536f8f1daad0e1df8e9cf
