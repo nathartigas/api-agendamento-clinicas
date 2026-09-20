@@ -28,3 +28,5 @@ def test_daily_schedule_escapes_stored_xss(
     assert response.status_code == 200
     assert '<script>alert("xss")</script>' not in response.text
     assert "&lt;script&gt;" in response.text
+    assert '<link rel="stylesheet" href="/static/reception.css">' in response.text
+    assert "<style>" not in response.text

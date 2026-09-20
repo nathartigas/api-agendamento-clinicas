@@ -27,6 +27,14 @@ jobs:
       - run: python -m pip install --requirement requirements-dev.txt
       - run: ruff check .
       - run: pytest --cov=app --cov-fail-under=90 -q
+      - name: Audit OpenAPI contract
+        run: python -m scripts.audit_openapi --output reports/openapi-audit.json
+      - name: Upload OpenAPI audit
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: openapi-audit
+          path: reports/openapi-audit.json
+          retention-days: 30
 
   sast:
     name: SAST — Bandit
@@ -89,11 +97,22 @@ jobs:
           chmod 0777 reports
           docker run --rm --network host \
             --volume "${{ github.workspace }}/reports:/zap/wrk:rw" \
-            ghcr.io/zaproxy/zaproxy:stable \
+            ghcr.io/zaproxy/zaproxy@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef \
             zap-baseline.py -t http://127.0.0.1:8000/docs \
-            -J zap-report.json -I
+            -J zap-report.json -r zap-report.html -w zap-report.md -I
       - name: Apply DAST gate
         run: python scripts/security_gate.py --zap reports/zap-report.json
+      - name: Upload ZAP evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: zap-passive-report
+          path: |
+            reports/zap-report.json
+            reports/zap-report.html
+            reports/zap-report.md
+          if-no-files-found: error
+          retention-days: 30
 
   security-gate:
     name: Security gate

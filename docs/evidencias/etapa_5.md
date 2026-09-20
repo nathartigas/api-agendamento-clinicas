@@ -25,8 +25,8 @@ python scripts/security_gate.py --bandit bandit-report.json
 
 O teste local valida código, política do gate e os novos cenários de ownership de listagem, claim
 de papel obsoleta, paginação abusiva e data sem timezone. Trivy e ZAP são executados no runner
-Linux do GitHub, onde Docker está disponível; a execução passiva final e seus artefatos serão
-consolidados no capstone.
+Linux do GitHub, onde Docker está disponível. A execução passiva final e os artefatos foram
+consolidados no capstone em `docs/evidencias/zap/`.
 
 Resultado local: **28 testes aprovados**, **94,45% de cobertura**, Ruff sem erros e security gate
 aprovado. O Bandit 1.9.4 analisou 1.090 linhas e produziu oito alertas baixos, todos falsos

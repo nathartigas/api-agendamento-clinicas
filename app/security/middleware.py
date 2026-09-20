@@ -103,5 +103,22 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' https://cdn.jsdelivr.net; "
+            "style-src 'self' https://cdn.jsdelivr.net; "
+            "img-src 'self' data:; "
+            "object-src 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'; "
+            "frame-ancestors 'none'"
+        )
+        response.headers["Cross-Origin-Embedder-Policy"] = "require-corp"
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+        response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        )
+        response.headers["Cache-Control"] = "no-store, max-age=0"
+        response.headers["Pragma"] = "no-cache"
         return response

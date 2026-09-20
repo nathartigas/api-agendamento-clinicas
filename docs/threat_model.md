@@ -138,8 +138,8 @@ validação formal.
 
 ### Superfícies condicionais privilegiadas
 
-- Pipeline e deploy: ainda não implementados; futuramente tokens de CI devem ter permissões
-  mínimas e jobs de pull request não acessam segredos de produção.
+- Pipeline: implementado com `contents: read`, checkout sem persistência de credenciais, actions e
+  imagem ZAP fixadas e nenhum segredo de produção em pull requests. O deploy continua ausente.
 - Administração: MFA é requisito, mas não transforma operações administrativas em não auditáveis.
 - Backup/restauração: restauração é operação privilegiada e deve validar destino, versão e
   autorização antes de substituir dados.
@@ -197,5 +197,18 @@ dependências e DAST passivo, e o job agregador bloqueia o merge quando um contr
 falha. Os limiares técnicos e os elevadores de impacto de negócio estão documentados em
 `docs/cvss_priorizacao.md`.
 
+## 7. Atualização da etapa 6
+
+O capstone validou o contrato OpenAPI com seis controles automatizados e executou duas varreduras
+passivas OWASP ZAP. A primeira apontou dois alertas médios e cinco baixos na Swagger UI. O
+hardening adicionou CSP completa, SRI com dependências versionadas, COEP, COOP, CORP, Permissions
+Policy e prevenção de cache. A varredura de verificação não encontrou alerta alto, médio ou baixo;
+restaram somente duas observações informativas.
+
+TM-08 e riscos de configuração no browser receberam defesa adicional. TM-01, TM-02, TM-04 e TM-09
+também passaram a ter verificação no OpenAPI ou testes com mocking. Os riscos residuais de
+infraestrutura continuam bloqueando produção: banco local, rate limit por processo, MFA simulado,
+ausência de TLS comprovado, auditoria append-only, cofre de segredos e backup testado.
+
 Repository: local:nathalia_artigas_DR2_AT
-Version: sha256:367744b5c8476fdf2941aa2967a455c4efb0b3e625f60ff60a59a5252698338e
+Version: sha256:bf98f1901b64a05e79f7b1ccadd6ab77d8d8f46f6816eddd9936f3709af45cb6

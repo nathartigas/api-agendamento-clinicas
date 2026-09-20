@@ -54,8 +54,9 @@ pytest -q
 | DELETE | `/api/v1/appointments/{id}` | Excluir consulta |
 | GET | `/reception/schedule/today` | Agenda HTML do dia |
 
-Pacientes e profissionais usados por uma consulta devem existir previamente. A criação desses
-recursos e a autenticação serão incorporadas nas próximas etapas do Assessment.
+Pacientes e profissionais usados por uma consulta devem existir previamente; o script
+`python -m scripts.seed_demo` cria dados locais de demonstração. Na versão final, todas as rotas
+clínicas exigem autenticação e autorização por papel, escopo e recurso.
 
 ## Etapa 2 — documentação de segurança
 
@@ -136,3 +137,22 @@ permita acesso indevido a dados de saúde.
 A justificativa das fases está em `docs/devsecops_pipeline.md`, a priorização em
 `docs/cvss_priorizacao.md`, a rastreabilidade dos testes em
 `docs/estrategia_testes_seguranca.md` e as evidências em `docs/evidencias/etapa_5.md`.
+
+## Etapa 6 — capstone e auditoria final
+
+O Exercício 13 conclui a aplicação com testes unitários usando mocking, auditoria reproduzível do
+OpenAPI, execução passiva do OWASP ZAP e relatório de rastreabilidade. A primeira execução do ZAP
+encontrou problemas de hardening na Swagger UI; depois das correções de CSP, SRI, políticas
+cross-origin, permissões e cache, o scan final ficou sem alertas altos, médios ou baixos.
+
+Resultado final local: 34 testes, 94,64% de cobertura, Ruff aprovado e 6/6 controles OpenAPI. O
+pipeline após correção concluiu testes, Bandit, Trivy, ZAP e security gate com sucesso.
+
+- relatório: `docs/relatorio_final_rastreabilidade.md`;
+- evidências: `docs/evidencias/etapa_6.md`;
+- ZAP antes/depois: `docs/evidencias/zap_before_hardening/` e `docs/evidencias/zap/`;
+- roteiro do vídeo: `docs/roteiro_video.md`;
+- link do vídeo: `VIDEO_LINK.txt` (deve ser preenchido antes do ZIP definitivo).
+
+O atendimento dos 24 critérios da avaliação está indexado em `docs/matriz_rubrica.md`, com a
+implementação, a evidência e o procedimento de verificação de cada item.
