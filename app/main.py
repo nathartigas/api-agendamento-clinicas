@@ -2,11 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.database.engine import create_db_and_tables
 from app.openapi import build_secure_openapi
-from app.routes import admin, appointments, auth, availability, health, reception
+from app.routes import admin, appointments, auth, availability, docs, health, reception
 from app.security.middleware import (
     JWTContextMiddleware,
     RateLimitMiddleware,
@@ -26,6 +27,8 @@ app = FastAPI(
     version="0.1.0",
     description="API REST para agendamento seguro de consultas médicas.",
     debug=settings.debug,
+    docs_url=None,
+    redoc_url=None,
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -44,7 +47,9 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.add_middleware(SecurityHeadersMiddleware)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(health.router)
+app.include_router(docs.router)
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(appointments.router, prefix="/api/v1")
 app.include_router(availability.router, prefix="/api/v1")
