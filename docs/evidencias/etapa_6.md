@@ -20,8 +20,8 @@ Responsável: Nathalia Artigas
 ## Resultado final
 
 - Ruff: aprovado;
-- pytest: 34 testes aprovados;
-- cobertura: 94,64%;
+- pytest: 36 testes aprovados;
+- cobertura: 95,02%;
 - OpenAPI: 6/6 controles aprovados;
 - Bandit: aprovado pelo gate;
 - Trivy: aprovado pelo gate;

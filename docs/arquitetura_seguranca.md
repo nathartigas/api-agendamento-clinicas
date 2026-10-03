@@ -53,7 +53,7 @@ IDs fornecidos pelo cliente como prova de ownership.
 | Stored XSS | Autoescape Jinja2 + teste | CSP e proibição de `safe` em dado externo |
 | Algoritmo JWT inseguro | Algoritmo permitido fixo; `exp`, `iss` e `aud` validados | Planejar rotação e revogação |
 | Senha em texto claro | Bcrypt com custo 12; hash nunca retornado | Aplicar política e migração de custo |
-| Condição de corrida | Não controlada | Constraint/transação para choque de horário |
+| Condição de corrida | Checagem de conflito no serviço | Constraint/transação no banco para múltiplas réplicas |
 | Erro verboso | `debug=false` por padrão | Handler uniforme e correlation ID |
 
 ## Eixo 3 — Segurança de infraestrutura

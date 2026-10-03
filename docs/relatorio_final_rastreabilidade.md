@@ -3,9 +3,9 @@
 **Projeto:** API de Agendamento de Consultas  
 **Autora:** Nathalia Artigas  
 **Assessment:** DR2 - Segurança de Software  
-**Snapshot auditado (`app/`, `tests/`, `scripts/`):** `sha256:bf98f1901b64a05e79f7b1ccadd6ab77d8d8f46f6816eddd9936f3709af45cb6`
+**Snapshot auditado (`app/`, `tests/`, `scripts/`):** `sha256:28e6ca6b8ec7b8c0b7258f7fab018d463f1b2b7c1703b8bda5000650378680b1`
 **Pull Request:** https://github.com/nathartigas/api-agendamento-clinicas/pull/3  
-**Pipeline final de correção:** https://github.com/nathartigas/api-agendamento-clinicas/actions/runs/35517319082
+**Pipeline da correção ZAP:** https://github.com/nathartigas/api-agendamento-clinicas/actions/runs/35517319082
 
 ## 1. Sumário executivo
 
@@ -75,7 +75,7 @@ um token Client Credentials separado e só consulta disponibilidade agregada.
 | TM-07 - cópia do banco | A02:2021 Cryptographic Failures | Configuração externa e acesso local mínimo. | inspeção de configuração | Residual; falta banco gerenciado/criptografado |
 | TM-08 - stored XSS | A03:2021 Injection | Regex/allowlist, autoescape e CSP. | `tests/test_templates.py`, `tests/test_appointments.py` | Mitigada |
 | TM-09 - mass assignment | API3:2023 | `extra="forbid"` e saída por allowlist. | `tests/test_mocked_security.py`, auditoria OAS-06 | Mitigada |
-| TM-10 - agenda inconsistente | API4:2023 | timezone obrigatório, validação e transação. | `tests/test_security_regressions.py` | Mitigada no processo; concorrência distribuída requer constraint |
+| TM-10 - agenda inconsistente | API4:2023 | timezone obrigatório e conflito de profissional/paciente retorna 409. | `tests/test_security_regressions.py`, `tests/test_appointments.py` | Mitigada em uma instância; concorrência distribuída requer constraint |
 
 ## 5. Auditoria OpenAPI
 
@@ -127,8 +127,8 @@ alerta médio ou baixo.
 Validação local final:
 
 - Ruff: aprovado;
-- pytest: 34 testes aprovados;
-- cobertura: 94,64%, acima do mínimo de 90%;
+- pytest: 36 testes aprovados;
+- cobertura: 95,02%, acima do mínimo de 90%;
 - auditoria OpenAPI: 6/6 controles aprovados.
 
 O pipeline executa testes/cobertura, Bandit, Trivy e ZAP em paralelo. O job `Security gate` depende

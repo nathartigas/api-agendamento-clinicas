@@ -29,7 +29,12 @@ WritePrincipal = Annotated[
 ]
 
 
-@router.post("", response_model=AppointmentRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=AppointmentRead,
+    status_code=status.HTTP_201_CREATED,
+    responses={status.HTTP_409_CONFLICT: {"description": "Horário já ocupado"}},
+)
 def create(payload: AppointmentCreate, session: SessionDependency, principal: WritePrincipal):
     authorize_create(principal, str(payload.professional_id))
     return create_appointment(session, payload)
@@ -53,7 +58,11 @@ def get_one(appointment_id: UUID, session: SessionDependency, principal: ReadPri
     return appointment
 
 
-@router.patch("/{appointment_id}", response_model=AppointmentRead)
+@router.patch(
+    "/{appointment_id}",
+    response_model=AppointmentRead,
+    responses={status.HTTP_409_CONFLICT: {"description": "Horário já ocupado"}},
+)
 def update(
     appointment_id: UUID,
     payload: AppointmentUpdate,

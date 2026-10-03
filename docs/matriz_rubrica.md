@@ -50,7 +50,7 @@ sido aceitos. A decisão de produção continua bloqueada no relatório final.
 | R21 | Security gate justificado e impedindo merge | Atendido | workflow, `security_gate.py`, ruleset ativo e PR #3 | Branch `main` exige PR atualizado e check obrigatório `Security gate`; cinco checks verdes. |
 | R22 | Estratégia rastreável ao threat model e pytest expandido | Atendido | `docs/estrategia_testes_seguranca.md` | TM-01, 02, 03, 04, 05, 08, 09, 10 e revogação/claims possuem testes. |
 | R23 | ZAP passivo, interpretação, OWASP, correção, residual e deploy | Atendido | ZAP antes/depois e `docs/relatorio_final_rastreabilidade.md` | Inicial: 2 médios, 5 baixos; final: nenhum alto/médio/baixo; produção bloqueada pelos residuais. |
-| R24 | Pytest com mocking, entradas/autorização e auditoria OpenAPI | Atendido | `tests/test_mocked_security.py`, `tests/test_openapi_security.py`, `scripts/audit_openapi.py` | 34 testes, 94,64% de cobertura e OpenAPI 6/6. |
+| R24 | Pytest com mocking, entradas/autorização e auditoria OpenAPI | Atendido | `tests/test_mocked_security.py`, `tests/test_openapi_security.py`, `scripts/audit_openapi.py` | 36 testes, 95,02% de cobertura e OpenAPI 6/6; conflitos de agenda retornam 409. |
 
 ## Evidência operacional final
 
@@ -68,4 +68,3 @@ sido aceitos. A decisão de produção continua bloqueada no relatório final.
 O único item que depende da autora é gravar e publicar o vídeo de até cinco minutos como não
 listado e substituir o conteúdo de `VIDEO_LINK.txt` pela URL. O merge do PR também permanece sem
 ser executado para preservar a revisão e o gate até o fechamento da entrega.
-

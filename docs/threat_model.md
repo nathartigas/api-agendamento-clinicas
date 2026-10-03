@@ -134,7 +134,7 @@ validação formal.
 | Alta | TM-07: copiar/adulterar arquivo de banco | Acesso ao host | Base completa comprometida | Permissão do host | Banco isolado, criptografia e least privilege | Default local em `app/config.py:11` |
 | Média, regressão | TM-08: stored XSS captura sessão futura | Bypass da validação e sink sem encoding | Ação no navegador da recepção | Allowlist, autoescape e CSP | Proibir `safe` e manter testes | `app/schemas/appointment.py:9`, `tests/test_templates.py:21` |
 | Média | TM-09: mass assignment forja auditoria | Enviar campo extra | Integridade de metadados | `extra="forbid"` testado | Política em todos os schemas e OpenAPI | `tests/test_appointments.py:90` |
-| Média | TM-10: datas conflitantes quebram agenda | Criar horários simultâneos | Dupla marcação | Timezone obrigatório | UTC, constraint e transação | `app/schemas/appointment.py:26` |
+| Média | TM-10: datas conflitantes quebram agenda | Criar horários simultâneos | Dupla marcação | Timezone e conflito 409 por profissional/paciente | UTC e constraint transacional distribuída | `app/schemas/appointment.py:26`, `app/services/appointments.py` |
 
 ### Superfícies condicionais privilegiadas
 
@@ -211,4 +211,4 @@ infraestrutura continuam bloqueando produção: banco local, rate limit por proc
 ausência de TLS comprovado, auditoria append-only, cofre de segredos e backup testado.
 
 Repository: local:nathalia_artigas_DR2_AT
-Version: sha256:bf98f1901b64a05e79f7b1ccadd6ab77d8d8f46f6816eddd9936f3709af45cb6
+Version: sha256:28e6ca6b8ec7b8c0b7258f7fab018d463f1b2b7c1703b8bda5000650378680b1

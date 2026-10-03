@@ -108,9 +108,10 @@ explicar cada linha do código.
 > Nos schemas Pydantic, a entrada usa whitelist, regex, limites e `extra forbid`, portanto campos
 > não declarados são rejeitados. O `AppointmentRead` é o response model e contém somente os campos
 > autorizados. Sem esse contrato, campos internos do modelo persistido poderiam vazar na resposta.
-> A persistência usa SQLModel, sessão por injeção de dependência e consultas parametrizadas. Na
-> agenda HTML, Jinja2 usa herança e autoescape, transformando uma tentativa de script em texto e
-> impedindo stored XSS.
+> A persistência usa SQLModel, sessão por injeção de dependência e consultas parametrizadas. Ela
+> também rejeita com status 409 um choque de horário do profissional ou do paciente. Na agenda
+> HTML, Jinja2 usa herança e autoescape, transformando uma tentativa de script em texto e impedindo
+> stored XSS.
 
 ### 1:30–2:10 — autenticação, autorização e integração M2M
 
@@ -166,7 +167,7 @@ autorizar. Mostre a resposta `401` e os códigos `401`, `403` e `429` documentad
 
 **Fala:**
 
-> A suíte final tem 34 testes e 94,64 por cento de cobertura. Há testes funcionais, regressões de
+> A suíte final tem 36 testes e 95,02 por cento de cobertura. Há testes funcionais, regressões de
 > segurança e testes com mocking, que provam que uma entrada inválida não chega ao serviço e que
 > uma autorização negada impede a mutação. No pipeline, testes e auditoria OpenAPI, SAST com
 > Bandit, análise de dependências com Trivy e DAST passivo com ZAP executam antes do gate. Eu defini
@@ -258,6 +259,8 @@ objeto mais completo, somente os campos de `AppointmentRead` chegam ao cliente.
 cliente não consegue enviar silenciosamente algo como `is_admin`, `created_by` ou outro campo
 interno. A whitelist e a expressão regular de `public_notes` aceitam somente caracteres previstos,
 enquanto os limites impedem entradas excessivas. A validação de timezone evita horários ambíguos.
+Na camada de serviço, uma consulta ativa no mesmo instante para o profissional ou paciente gera
+`409 Conflict`; a regra vale tanto para criação quanto para remarcação.
 
 ### 4.4 Jinja2, autoescape e stored XSS
 
@@ -331,14 +334,22 @@ o tipo correto, evitando que um token de laboratório acesse rotas humanas.
 O rate limiter atual fica em memória e protege uma instância. Em produção, várias réplicas exigem
 um contador distribuído, por exemplo em gateway ou Redis.
 
-### 4.12 SQLModel, queries parametrizadas e segredos
+### 4.12 Consistência da agenda e `409 Conflict`
+
+Antes de persistir uma criação ou remarcação, o serviço consulta se existe uma consulta não
+cancelada no mesmo instante para o profissional ou para o paciente. Havendo conflito, a API
+responde 409, código HTTP adequado quando a requisição é válida, mas conflita com o estado atual.
+Essa checagem cobre a regra de negócio em uma instância. Produção com concorrência real ainda deve
+usar constraint ou transação no banco para impedir duas gravações simultâneas entre réplicas.
+
+### 4.13 SQLModel, queries parametrizadas e segredos
 
 SQLModel integra modelos Python e persistência SQL. Expressões como `select(...).where(...)` fazem
 o driver enviar os valores como parâmetros separados do comando, reduzindo SQL injection. A
 configuração vem de `BaseSettings`. O Git contém somente `.env.example`; o `.env` verdadeiro fica
 ignorado e nunca entra no ZIP.
 
-### 4.13 SAST, SCA, DAST e IAST no SDLC
+### 4.14 SAST, SCA, DAST e IAST no SDLC
 
 - **SAST/Bandit:** analisa código sem executar a aplicação; entra cedo, em cada pull request.
 - **SCA/Trivy:** verifica dependências e componentes conhecidos; roda na CI e antes do deploy.
@@ -346,7 +357,7 @@ ignorado e nunca entra no ZIP.
 - **IAST:** instrumentaria a aplicação durante testes para combinar execução e contexto interno.
   Foi classificado para integração/homologação, mas não foi implementado neste escopo acadêmico.
 
-### 4.14 CVSS, impacto de negócio e gate
+### 4.15 CVSS, impacto de negócio e gate
 
 CVSS estima severidade técnica com fatores como vetor de ataque, complexidade, privilégios e
 impacto. Ele não conhece sozinho o contexto da clínica. Por isso, o projeto também considera o
@@ -354,21 +365,21 @@ impacto de negócio: acesso indevido a dados de saúde pode bloquear o pipeline 
 ferramenta atribua severidade menor. O gate agrega quatro resultados e falha quando qualquer
 controle obrigatório falha.
 
-### 4.15 Testes com mocking
+### 4.16 Testes com mocking
 
 Mocking substitui temporariamente uma dependência por uma implementação controlada. Ele permite
 provar propriedades específicas: se a validação rejeitar a entrada, o serviço não deve ser chamado;
 se a autorização negar o acesso, a função de atualização também não deve ser chamada. Isso é mais
 forte do que verificar somente um status HTTP.
 
-### 4.16 Auditoria OpenAPI
+### 4.17 Auditoria OpenAPI
 
 O script lê o contrato gerado pela própria aplicação e verifica seis propriedades: emissor OAuth2,
 escopos, respostas 401/403, resposta 429, ausência de campos internos e rejeição de propriedades
 extras. O resultado 6/6 mostra que o contrato público corresponde às decisões de segurança. BOLA
 continua validada por testes, pois OpenAPI não expressa ownership de objetos.
 
-### 4.17 OWASP ZAP passivo e o antes/depois
+### 4.18 OWASP ZAP passivo e o antes/depois
 
 O ZAP passivo observa respostas sem executar ataques destrutivos. O scan inicial encontrou dois
 alertas médios e cinco baixos na Swagger UI. As correções incluíram CSP completa, SRI, versões
@@ -376,7 +387,7 @@ fixadas, políticas cross-origin, Permissions Policy e bloqueio de cache. No sca
 alertas altos, médios ou baixos. “Modern Web Application” e “Non-Storable Content” são
 informativos; o segundo inclusive confirma que o cache foi restringido.
 
-### 4.18 Por que o pipeline verde não autoriza produção?
+### 4.19 Por que o pipeline verde não autoriza produção?
 
 O pipeline prova propriedades do código e do ambiente de CI, mas não prova toda a infraestrutura
 real. Ainda faltam evidências de TLS na borda, criptografia do banco, segredo em cofre, rotação,

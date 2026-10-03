@@ -63,7 +63,8 @@ mudança no modelo persistente altere silenciosamente a API pública.
 ### Lacunas desta versão
 
 - Não há controle de concorrência otimista, trilha de autoria confiável ou log imutável.
-- A aplicação ainda não detecta choque de horários.
+- A aplicação detecta choque exato de horários para profissional e paciente; concorrência entre
+  múltiplas réplicas ainda requer constraint transacional no banco de produção.
 
 ## Disponibilidade
 

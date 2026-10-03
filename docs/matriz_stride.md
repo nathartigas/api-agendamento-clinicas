@@ -6,7 +6,7 @@ Legenda de situação: **I** implementado, **P** planejado, **L** lacuna conheci
 |---|---|---|---|---|---|---|
 | API FastAPI | I: OAuth2/JWT | I: schema fechado, assinatura e ownership | L: sem auditoria imutável | I: response model e rotas protegidas | I: paginação e rate limit | I: RBAC + ownership |
 | Serviço de autenticação | I: bcrypt, JWT e MFA simulado | I: assinatura JWT e algoritmo fixo | P: eventos de login | I: erros uniformes e tokens fora de respostas indevidas | I: limites fortes distintos; P: distribuição | I: papéis, scopes e claims validados |
-| Serviço de consultas | I: recebe principal validado | I: enum, UUID e referências; P: conflito de agenda | L: sem trilha imutável | I: ownership antes do acesso | I: quota local por ator; P: distribuição | I: RBAC + recurso |
+| Serviço de consultas | I: recebe principal validado | I: enum, UUID, referências e conflito 409; P: constraint distribuída | L: sem trilha imutável | I: ownership antes do acesso | I: quota local por ator; P: distribuição | I: RBAC + recurso |
 | Banco SQLModel | P: conta de serviço | I: API parametrizada; P: least privilege | L: sem auditoria de banco | L: SQLite legível no host | L: ponto único de falha | P: credencial restrita, sem papel admin |
 | Página da recepção | I: JWT obrigatório | I: somente leitura | L: sem auditoria de visualização | I: autoescape, CSP e agenda autenticada | I: no-store e limite local | I: papel e filtro do profissional |
 | Laboratório M2M | I: Client Credentials | I: claims assinadas e audience | P: `client_id` nos eventos | I: somente disponibilidade agregada | I: quota M2M local; P: distribuição | I: escopo `availability:read` e negação nas outras rotas |

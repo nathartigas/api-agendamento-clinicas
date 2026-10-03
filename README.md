@@ -145,8 +145,13 @@ OpenAPI, execução passiva do OWASP ZAP e relatório de rastreabilidade. A prim
 encontrou problemas de hardening na Swagger UI; depois das correções de CSP, SRI, políticas
 cross-origin, permissões e cache, o scan final ficou sem alertas altos, médios ou baixos.
 
-Resultado final local: 34 testes, 94,64% de cobertura, Ruff aprovado e 6/6 controles OpenAPI. O
+Resultado final local: 36 testes, 95,02% de cobertura, Ruff aprovado e 6/6 controles OpenAPI. O
 pipeline após correção concluiu testes, Bandit, Trivy, ZAP e security gate com sucesso.
+
+Após a publicação do [starter kit da disciplina](https://github.com/fabiano-domingues-prof-infnet-edu-br/desenvolvimento-seguro/tree/main/clinica-api-assessment),
+a regra de negócio sugerida para horários ocupados também foi incorporada: criação e remarcação
+rejeitam com `409 Conflict` qualquer choque do mesmo profissional ou paciente. A checagem está
+centralizada na camada de serviço e coberta por testes.
 
 - relatório: `docs/relatorio_final_rastreabilidade.md`;
 - evidências: `docs/evidencias/etapa_6.md`;

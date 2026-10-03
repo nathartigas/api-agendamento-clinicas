@@ -96,4 +96,7 @@ atualizado no capstone; lacunas restantes aparecem como riscos residuais de prod
 - **Ação:** enviar data sem timezone, formato inválido ou horário conflitante.
 - **Resultado indevido:** agendamento no dia errado ou dupla marcação.
 - **Controle atual:** timezone obrigatório (`app/schemas/appointment.py:17`).
-- **Lacuna:** ainda não há prevenção de conflito, janela operacional ou normalização UTC.
+- **Controle atual:** timezone obrigatório e rejeição `409 Conflict` quando profissional ou
+  paciente já possui consulta ativa no mesmo instante.
+- **Lacuna:** janela operacional, normalização UTC no banco e constraint contra corrida entre
+  múltiplas réplicas permanecem controles de produção.
