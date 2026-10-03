@@ -2,9 +2,10 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from sqlalchemy import or_
 from sqlmodel import Session, select
 
-from app.models import Appointment, Patient, Professional
+from app.models import Appointment, AppointmentStatus, Patient, Professional
 from app.schemas.appointment import AppointmentCreate, AppointmentUpdate
 
 
@@ -18,8 +19,39 @@ def _require_related_records(session: Session, patient_id: UUID, professional_id
         )
 
 
+def _ensure_slot_available(
+    session: Session,
+    *,
+    patient_id: UUID,
+    professional_id: UUID,
+    scheduled_at: datetime,
+    exclude_appointment_id: UUID | None = None,
+) -> None:
+    statement = select(Appointment).where(
+        Appointment.scheduled_at == scheduled_at,
+        Appointment.status != AppointmentStatus.cancelled,
+        or_(
+            Appointment.professional_id == professional_id,
+            Appointment.patient_id == patient_id,
+        ),
+    )
+    if exclude_appointment_id is not None:
+        statement = statement.where(Appointment.id != exclude_appointment_id)
+    if session.exec(statement).first() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Horário indisponível para o profissional ou paciente",
+        )
+
+
 def create_appointment(session: Session, payload: AppointmentCreate) -> Appointment:
     _require_related_records(session, payload.patient_id, payload.professional_id)
+    _ensure_slot_available(
+        session,
+        patient_id=payload.patient_id,
+        professional_id=payload.professional_id,
+        scheduled_at=payload.scheduled_at,
+    )
     appointment = Appointment.model_validate(payload)
     session.add(appointment)
     session.commit()
@@ -53,6 +85,15 @@ def update_appointment(
     payload: AppointmentUpdate,
 ) -> Appointment:
     appointment = get_appointment_or_404(session, appointment_id)
+    target_status = payload.status or appointment.status
+    if target_status != AppointmentStatus.cancelled:
+        _ensure_slot_available(
+            session,
+            patient_id=appointment.patient_id,
+            professional_id=appointment.professional_id,
+            scheduled_at=payload.scheduled_at or appointment.scheduled_at,
+            exclude_appointment_id=appointment.id,
+        )
     for field_name, value in payload.model_dump(exclude_unset=True).items():
         setattr(appointment, field_name, value)
     appointment.updated_at = datetime.now(timezone.utc)

@@ -30,7 +30,8 @@ Verifique:
 
 ```bash
 curl -i http://127.0.0.1:8000/health
-curl -i http://127.0.0.1:8000/reception/schedule/today
+curl -i http://127.0.0.1:8000/docs
+curl -i http://127.0.0.1:8000/reception/schedule/today  # 401 sem Bearer token
 ```
 
 ## Resultado da validação em 19/09/2026
@@ -41,9 +42,13 @@ Pytest: 4 passed
 Cobertura inicial: 96%
 GET /health: HTTP 200 {"status":"ok"}
 GET /openapi.json: HTTP 200
-GET /reception/schedule/today: HTTP 200
+GET /reception/schedule/today: HTTP 401 sem autenticação na versão final
 ```
 
 O teste de ciclo completo cria, lista, altera, exclui e confirma o `404` subsequente de uma
 consulta. O ambiente virtual usado na validação foi criado em `.venv`, que está ignorado pelo
 controle de versão e será excluído do ZIP final.
+
+O `200` da agenda pertencia à fundação anterior à autenticação. Na versão final, o `401` sem token
+é o resultado seguro esperado; com usuário autorizado, o teste de template confirma `200` e
+autoescape. A captura textual final está em `docs/evidencias/validacao_http_final.txt`.

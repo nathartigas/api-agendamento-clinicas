@@ -35,11 +35,12 @@ evitando que uma mudança acidental torne o gate permissivo.
 
 - O workflow usa somente `pull_request`, não `pull_request_target`, portanto código de forks não
   recebe contexto privilegiado.
-- Actions de checkout, Python e Trivy são fixadas em SHAs completos revisados, com a versão legível
-  em comentário; o Dependabot propõe atualizações controladas semanalmente.
+- Actions de checkout, Python e Trivy, além da imagem OCI do ZAP, são fixadas em digests/SHAs
+  completos revisados; o Dependabot propõe atualizações controladas semanalmente.
 - Relatórios não devem conter tokens, bodies clínicos ou dados reais.
-- A regra de proteção da branch deve exigir o check `Security gate`; essa configuração acontece no
-  repositório GitHub e não pode ser imposta apenas pelo YAML.
+- O ruleset ativo `Proteção da branch principal` exige Pull Request, branch atualizada e o check
+  `Security gate`, além de bloquear exclusão e non-fast-forward. Essa configuração foi verificada
+  no GitHub durante a revisão final.
 
 ## Referências de versões verificadas
 

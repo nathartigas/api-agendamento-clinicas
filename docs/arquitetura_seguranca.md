@@ -53,7 +53,7 @@ IDs fornecidos pelo cliente como prova de ownership.
 | Stored XSS | Autoescape Jinja2 + teste | CSP e proibição de `safe` em dado externo |
 | Algoritmo JWT inseguro | Algoritmo permitido fixo; `exp`, `iss` e `aud` validados | Planejar rotação e revogação |
 | Senha em texto claro | Bcrypt com custo 12; hash nunca retornado | Aplicar política e migração de custo |
-| Condição de corrida | Não controlada | Constraint/transação para choque de horário |
+| Condição de corrida | Checagem de conflito no serviço | Constraint/transação no banco para múltiplas réplicas |
 | Erro verboso | `debug=false` por padrão | Handler uniforme e correlation ID |
 
 ## Eixo 3 — Segurança de infraestrutura
@@ -61,13 +61,13 @@ IDs fornecidos pelo cliente como prova de ownership.
 | Vetor | Estado atual | Controle de produção necessário |
 |---|---|---|
 | Tráfego em claro | Fora do escopo local | TLS/HSTS no proxy e rede privada internamente |
-| CORS wildcard | CORS não configurado | Allowlist explícita por ambiente |
-| Clickjacking/MIME sniffing | Headers ausentes | `X-Frame-Options` e `X-Content-Type-Options` |
-| Força bruta/DoS | Limite apenas de paginação | Rate limiting distribuído e limite especial no login |
+| CORS wildcard | Allowlist explícita por ambiente | Manter somente origens HTTPS de produção |
+| Clickjacking/MIME sniffing | `DENY`, `nosniff`, CSP e políticas cross-origin | Validar também na borda |
+| Força bruta/DoS | Limites locais e diferenciados | Rate limiting distribuído, métricas e alerta |
 | Banco exposto | SQLite local | Banco sem porta pública e security group restrito |
 | Segredos no deploy | `.env.example` sem segredo | Secret manager e rotação |
-| Dependência vulnerável | Sem automação | `pip-audit`, lock e security gate |
-| Falta de telemetria | Sem stack definida | métricas, logs minimizados e alertas |
+| Dependência vulnerável | Trivy no CI e Dependabot semanal | Lock/hash reprodutível e SLA de atualização |
+| Falta de telemetria | Gate e artefatos de CI; sem stack de runtime | Métricas, logs minimizados e alertas de produção |
 
 ## Fronteiras e responsabilidades
 

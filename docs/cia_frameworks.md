@@ -33,7 +33,9 @@ sensível, ainda que cada campo isolado pareça pouco revelador.
 
 ### Lacunas desta versão
 
-- JWT não possui revogação imediata; a janela residual é limitada pela expiração.
+- A aplicação revoga efetivamente o acesso ao confrontar cada JWT com `is_active`, papel, vínculo
+  e escopos atuais; ainda não existe denylist por `jti` para revogar um token isolado sem desativar
+  o principal.
 - O MFA administrativo é uma simulação acadêmica, não um fator de posse real.
 - SQLite local não oferece, sozinho, criptografia em repouso ou separação de privilégios.
 - Logs, retenção, anonimização e atendimento a direitos do titular ainda não foram definidos.
@@ -61,7 +63,8 @@ mudança no modelo persistente altere silenciosamente a API pública.
 ### Lacunas desta versão
 
 - Não há controle de concorrência otimista, trilha de autoria confiável ou log imutável.
-- A aplicação ainda não detecta choque de horários.
+- A aplicação detecta choque exato de horários para profissional e paciente; concorrência entre
+  múltiplas réplicas ainda requer constraint transacional no banco de produção.
 
 ## Disponibilidade
 
@@ -74,7 +77,8 @@ mudança no modelo persistente altere silenciosamente a API pública.
 
 ### Lacunas desta versão
 
-- Não há rate limiting, timeout de infraestrutura, retry controlado ou circuit breaker.
+- Há rate limiting local e diferenciado, mas múltiplas réplicas exigem armazenamento distribuído;
+  timeouts de infraestrutura, retry controlado e circuit breaker ainda dependem do deploy.
 - `/health` não verifica a dependência de banco.
 - O banco SQLite é um ponto único de falha e não é adequado à carga de produção.
 - Backup, restauração e objetivos RPO/RTO ainda não foram especificados.

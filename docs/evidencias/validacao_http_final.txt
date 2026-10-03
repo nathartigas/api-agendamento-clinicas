@@ -1,0 +1,29 @@
+Validação HTTP final - 20/09/2026
+Autora: Nathalia Artigas
+Comando de servidor: uvicorn app.main:app --host 127.0.0.1 --port 8765
+
+GET /health
+HTTP/1.1 200 OK
+content-type: application/json
+cache-control: no-store, max-age=0
+body: {"status":"ok"}
+
+GET /openapi.json
+HTTP/1.1 200 OK
+content-type: application/json
+title: API de Agendamento de Consultas
+version: 0.1.0
+paths: 7
+
+GET /docs
+HTTP/1.1 200 OK
+content-type: text/html; charset=utf-8
+Subresource Integrity: 2 dependências com SHA-384
+
+GET /reception/schedule/today sem Bearer token
+HTTP/1.1 401 Unauthorized
+content-type: application/json
+
+Todas as respostas incluem CSP, HSTS, X-Frame-Options, X-Content-Type-Options,
+COEP, COOP, CORP, Permissions-Policy e prevenção de cache. A resposta 401 da agenda é esperada:
+a página interna exige usuário humano autenticado com escopo appointments:read.

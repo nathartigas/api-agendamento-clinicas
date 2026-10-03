@@ -38,6 +38,8 @@ Jinja2, autenticação JWT, bcrypt, MFA administrativo simulado, RBAC, ownership
 rate limiting, revogação por estado atual, CORS restrito e headers de segurança. A auditoria
 estática da etapa 4 identificou três findings pré-correção, todos tratados e cobertos por testes.
 
-Ainda faltam auditoria append-only, infraestrutura TLS comprovada, limitador distribuído,
-monitoramento, backup, rotação de segredos e controles automatizados de implantação. Portanto,
-esta versão continua somente para desenvolvimento local e não está autorizada para produção.
+O pipeline automatizado executa testes/cobertura, Bandit, Trivy, OWASP ZAP e um security gate
+obrigatório na branch principal. Ainda faltam auditoria append-only, infraestrutura TLS
+comprovada, limitador distribuído, monitoramento, backup e rotação operacional de segredos.
+Portanto, esta versão continua somente para desenvolvimento local e não está autorizada para
+produção.

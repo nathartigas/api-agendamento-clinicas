@@ -1,0 +1,46 @@
+{
+  "title": "Auditoria OpenAPI — API de Agendamento",
+  "status": "pass",
+  "summary": {
+    "checks": 6,
+    "passed": 6,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "id": "OAS-01",
+      "status": "pass",
+      "evidence": "OAuth2 Password aponta para o emissor humano esperado."
+    },
+    {
+      "id": "OAS-02",
+      "status": "pass",
+      "evidence": "Escopos humanos, administrativos e M2M estão declarados."
+    },
+    {
+      "id": "OAS-03",
+      "status": "pass",
+      "evidence": "9 operações protegidas documentam 401 e 403."
+    },
+    {
+      "id": "OAS-04",
+      "status": "pass",
+      "evidence": "Todas as operações públicas documentadas incluem resposta 429."
+    },
+    {
+      "id": "OAS-05",
+      "status": "pass",
+      "evidence": "Campos internos expostos: nenhum."
+    },
+    {
+      "id": "OAS-06",
+      "status": "pass",
+      "evidence": "Schemas de criação e atualização rejeitam propriedades extras."
+    }
+  ],
+  "observations": [
+    "O endpoint /health é intencionalmente excluído do contrato público.",
+    "HTTP Basic aparece somente no emissor Client Credentials.",
+    "O contrato não substitui testes de ownership, pois OpenAPI não expressa BOLA."
+  ]
+}

@@ -68,7 +68,8 @@ nas rotas humanas.
 
 - O password flow é requisito explícito do exercício; para uma aplicação pública moderna seria
   preferível Authorization Code com PKCE e um provedor de identidade.
-- Não existe revogação imediata de JWT; a expiração limita a janela. Uma conta desativada depois
-  da emissão pode conservar acesso até o token expirar.
+- Usuários e clientes desativados perdem acesso na requisição seguinte porque as claims são
+  confrontadas com o estado atual. Ainda não existe denylist por `jti` para revogar apenas uma
+  sessão sem desativar o principal.
 - O MFA é simulado e não deve ser considerado fator de posse real.
 - Rotação de segredo do laboratório e chave de assinatura depende da infraestrutura futura.

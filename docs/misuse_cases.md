@@ -1,7 +1,7 @@
 # Exercício 4 — Misuse cases
 
 Os casos abaixo são cenários de ameaça, não findings confirmados. O estado de cada controle foi
-atualizado após a etapa 3; lacunas restantes serão tratadas nas próximas etapas.
+atualizado no capstone; lacunas restantes aparecem como riscos residuais de produção.
 
 ## MC-01 — Trocar o ID e acessar consulta alheia
 
@@ -48,9 +48,10 @@ atualizado após a etapa 3; lacunas restantes serão tratadas nas próximas etap
 - **Ator:** cliente anônimo ou bot.
 - **Ação:** repetir criação, atualização, login ou renderização da agenda.
 - **Resultado indevido:** saturar workers, conexões ou armazenamento.
-- **Controle atual:** listagem limitada a 100 itens (`app/routes/appointments.py:43`).
-- **Mitigação planejada:** limites globais e por rota, limite mais forte no login, tamanho máximo
-  de corpo, timeout e monitoramento.
+- **Controle atual:** listagem limitada a 100 itens e rate limiting central com orçamentos mais
+  fortes para login humano e Client Credentials.
+- **Risco residual:** o contador é local ao processo; produção exige limitador distribuído,
+  tamanho máximo de corpo na borda, timeout e monitoramento.
 
 ## MC-06 — Laboratório usa token além do contrato
 
@@ -67,7 +68,9 @@ atualizado após a etapa 3; lacunas restantes serão tratadas nas próximas etap
 - **Ação:** password spraying ou credential stuffing no endpoint de login.
 - **Resultado indevido:** assumir conta com acesso amplo.
 - **Controle atual:** bcrypt, mensagens uniformes, MFA administrativo simulado e expiração JWT.
-- **Lacuna:** rate limiting e eventos de auditoria entram nas próximas etapas.
+- **Controle adicional:** rate limiting diferenciado retorna 429 e `Retry-After`.
+- **Lacuna:** eventos de auditoria append-only e detecção de credential stuffing ainda dependem da
+  infraestrutura de produção.
 
 ## MC-08 — Roubo ou adulteração do banco local
 
@@ -93,4 +96,7 @@ atualizado após a etapa 3; lacunas restantes serão tratadas nas próximas etap
 - **Ação:** enviar data sem timezone, formato inválido ou horário conflitante.
 - **Resultado indevido:** agendamento no dia errado ou dupla marcação.
 - **Controle atual:** timezone obrigatório (`app/schemas/appointment.py:17`).
-- **Lacuna:** ainda não há prevenção de conflito, janela operacional ou normalização UTC.
+- **Controle atual:** timezone obrigatório e rejeição `409 Conflict` quando profissional ou
+  paciente já possui consulta ativa no mesmo instante.
+- **Lacuna:** janela operacional, normalização UTC no banco e constraint contra corrida entre
+  múltiplas réplicas permanecem controles de produção.

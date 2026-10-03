@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
+from sqlmodel import Session
 
-from app.models import Patient, Professional
+from app.models import Appointment, Patient, Professional
 
 
 def appointment_payload(patient: Patient, professional: Professional) -> dict[str, str]:
@@ -127,3 +128,60 @@ def test_update_rejects_script_markup_in_notes(
     )
 
     assert response.status_code == 422
+
+
+def test_rejects_double_booking_for_same_professional(
+    client: TestClient,
+    sample_people: tuple[Patient, Professional],
+    auth_headers: dict[str, str],
+) -> None:
+    patient, professional = sample_people
+    payload = appointment_payload(patient, professional)
+
+    first_response = client.post(
+        "/api/v1/appointments",
+        json=payload,
+        headers=auth_headers,
+    )
+    conflict_response = client.post(
+        "/api/v1/appointments",
+        json=payload,
+        headers=auth_headers,
+    )
+
+    assert first_response.status_code == 201
+    assert conflict_response.status_code == 409
+    assert conflict_response.json() == {
+        "detail": "Horário indisponível para o profissional ou paciente"
+    }
+
+
+def test_rejects_update_to_occupied_slot(
+    client: TestClient,
+    session: Session,
+    sample_people: tuple[Patient, Professional],
+    auth_headers: dict[str, str],
+) -> None:
+    patient, professional = sample_people
+    first_time = datetime.now(timezone.utc) + timedelta(days=1)
+    second_time = first_time + timedelta(hours=1)
+    existing = Appointment(
+        patient_id=patient.id,
+        professional_id=professional.id,
+        scheduled_at=first_time,
+    )
+    movable = Appointment(
+        patient_id=patient.id,
+        professional_id=professional.id,
+        scheduled_at=second_time,
+    )
+    session.add_all([existing, movable])
+    session.commit()
+
+    response = client.patch(
+        f"/api/v1/appointments/{movable.id}",
+        json={"scheduled_at": first_time.isoformat()},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 409

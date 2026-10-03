@@ -5,10 +5,17 @@
 O `SecurityHeadersMiddleware` acrescenta a toda resposta:
 
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains`;
-- `Content-Security-Policy: default-src 'self'; frame-ancestors 'none'`;
+- CSP com `default-src`, fontes explícitas de script/estilo/imagem, `object-src 'none'`,
+  `base-uri`, `form-action` e `frame-ancestors`;
 - `X-Frame-Options: DENY`;
 - `X-Content-Type-Options: nosniff`;
-- `Referrer-Policy: no-referrer`.
+- `Referrer-Policy: no-referrer`;
+- COEP `require-corp`, COOP/CORP `same-origin` e Permissions Policy restritiva;
+- `Cache-Control: no-store` e `Pragma: no-cache`.
+
+A Swagger UI usa dependências fixadas em versão exata, SRI SHA-384, `crossorigin="anonymous"` e
+script de inicialização local. A agenda da recepção usa CSS local, sem estilo inline incompatível
+com a CSP.
 
 O CORS não usa wildcard. Origens, métodos e headers permitidos são declarados explicitamente em
 `app/main.py`, e as origens vêm de `CORS_ALLOWED_ORIGINS`.
