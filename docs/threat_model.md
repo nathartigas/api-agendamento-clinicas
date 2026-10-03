@@ -211,4 +211,4 @@ infraestrutura continuam bloqueando produção: banco local, rate limit por proc
 ausência de TLS comprovado, auditoria append-only, cofre de segredos e backup testado.
 
 Repository: local:nathalia_artigas_DR2_AT
-Version: sha256:28e6ca6b8ec7b8c0b7258f7fab018d463f1b2b7c1703b8bda5000650378680b1
+Version: sha256:bf0f45dbb9cbed17d22609c4e727620043b34e8d3af7cf5a6fb1e8ca01250c05

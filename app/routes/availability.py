@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Annotated
 from uuid import UUID
 
@@ -32,15 +32,15 @@ def get_availability(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profissional não encontrado",
         )
-    start = datetime.combine(target_date, time(hour=8))
-    end = datetime.combine(target_date, time(hour=18))
+    start = datetime.combine(target_date, time(hour=8), tzinfo=timezone.utc)
+    end = datetime.combine(target_date, time(hour=18), tzinfo=timezone.utc)
     statement = select(Appointment.scheduled_at).where(
         Appointment.professional_id == professional_id,
         Appointment.scheduled_at >= start,
         Appointment.scheduled_at < end,
         Appointment.status != AppointmentStatus.cancelled,
     )
-    occupied = {value.replace(tzinfo=None) for value in session.exec(statement).all()}
+    occupied = set(session.exec(statement).all())
     slots: list[datetime] = []
     current = start
     while current < end:

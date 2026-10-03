@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
@@ -17,7 +17,12 @@ def test_daily_schedule_escapes_stored_xss(
         Appointment(
             patient_id=patient.id,
             professional_id=professional.id,
-            scheduled_at=datetime.now().replace(hour=10, minute=0, second=0, microsecond=0),
+            scheduled_at=datetime.now(timezone.utc).replace(
+                hour=10,
+                minute=0,
+                second=0,
+                microsecond=0,
+            ),
             public_notes='<script>alert("xss")</script>',
         )
     )

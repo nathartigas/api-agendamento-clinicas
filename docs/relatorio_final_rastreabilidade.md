@@ -3,7 +3,7 @@
 **Projeto:** API de Agendamento de Consultas  
 **Autora:** Nathalia Artigas  
 **Assessment:** DR2 - Segurança de Software  
-**Snapshot auditado (`app/`, `tests/`, `scripts/`):** `sha256:28e6ca6b8ec7b8c0b7258f7fab018d463f1b2b7c1703b8bda5000650378680b1`
+**Snapshot auditado (`app/`, `tests/`, `scripts/`):** `sha256:bf0f45dbb9cbed17d22609c4e727620043b34e8d3af7cf5a6fb1e8ca01250c05`
 **Pull Request:** https://github.com/nathartigas/api-agendamento-clinicas/pull/3  
 **Pipeline da correção ZAP:** https://github.com/nathartigas/api-agendamento-clinicas/actions/runs/35517319082
 

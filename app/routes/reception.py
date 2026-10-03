@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Annotated
 
@@ -28,7 +28,7 @@ templates.env.autoescape = select_autoescape(enabled_extensions=("html", "xml"),
 def daily_schedule(request: Request, session: SessionDependency, principal: ReceptionPrincipal):
     require_roles(UserRole.receptionist, UserRole.professional, UserRole.admin)(principal)
     today = date.today()
-    start = datetime.combine(today, time.min)
+    start = datetime.combine(today, time.min, tzinfo=timezone.utc)
     end = start + timedelta(days=1)
     statement = (
         select(Appointment, Patient, Professional)
