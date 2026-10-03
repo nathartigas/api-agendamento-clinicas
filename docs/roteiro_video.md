@@ -50,24 +50,44 @@ Confirme previamente:
 - a internet está estável para abrir o GitHub;
 - o pipeline final está verde.
 
-### 1.3 Deixe estas telas abertas, nesta ordem
+### 1.3 Preparação fácil das telas
 
-1. editor na raiz do projeto, com a árvore `app/` expandida;
-2. navegador em `http://127.0.0.1:8000/docs`;
-3. terminal na raiz do projeto;
-4. `docs/threat_model.md` no editor;
-5. `.github/workflows/security.yml` no editor;
-6. execução final do pipeline:
-   `https://github.com/nathartigas/api-agendamento-clinicas/actions/runs/35518542972`;
-7. `docs/relatorio_tecnico_final.pdf` aberto na última página.
+Você não precisa procurar arquivos durante a gravação. Antes de começar, deixe somente estas abas
+abertas, já na ordem abaixo.
 
-Use zoom entre 110% e 125%. Faça uma gravação de teste e procure terminar entre **4min30s e
-4min50s**. O texto principal tem aproximadamente 650 palavras. Fale com calma, mas não pare para
-explicar cada linha do código.
+**No editor:**
+
+1. `README.md`, com a árvore `app/` visível;
+2. `app/schemas/appointment.py`, perto das linhas 18 a 70;
+3. `app/security/authorization.py`, perto da linha 54;
+4. `docs/threat_model.md`, perto das linhas 128 a 138;
+5. `.github/workflows/security.yml`, perto da linha 118;
+6. `docs/relatorio_tecnico_final.pdf`, na última página.
+
+**No navegador:**
+
+1. `http://127.0.0.1:8000/health`;
+2. `http://127.0.0.1:8000/docs`;
+3. pipeline final:
+   `https://github.com/nathartigas/api-agendamento-clinicas/actions/runs/37134910630`.
+
+Durante o vídeo, siga apenas esta sequência:
+
+```text
+README -> /health -> schemas -> autorização -> threat model
+       -> Swagger -> pipeline -> relatório PDF
+```
+
+Use zoom entre 110% e 125%. Não execute os testes durante a gravação: mostre o resultado verde no
+GitHub. Assim você evita esperar ou lidar com uma falha de internet no meio da apresentação.
+
+O roteiro abaixo foi escrito com frases curtas. As palavras técnicas obrigatórias aparecem, mas são
+explicadas de forma simples. A previsão é terminar em aproximadamente 4 minutos e 20 segundos,
+deixando uma margem confortável antes dos 5 minutos.
 
 ## 2. Roteiro cronometrado — falas exatas e telas
 
-### 0:00–0:25 — apresentação e contexto
+### 0:00–0:25 — apresentação
 
 **Tela:** editor mostrando a raiz e o título do `README.md`.
 
@@ -75,12 +95,11 @@ explicar cada linha do código.
 
 **Fala:**
 
-> Olá, meu nome é Nathalia Artigas. Neste Assessment eu desenvolvi uma API REST segura para uma
-> rede de clínicas realizar o agendamento de consultas médicas. Como a aplicação trata dados de
-> saúde, eu considerei confidencialidade, integridade e disponibilidade desde a arquitetura, e não
-> somente no final do desenvolvimento.
+> Olá, meu nome é Nathalia Artigas. Neste trabalho eu desenvolvi uma API para o agendamento de
+> consultas médicas. Como o sistema trabalha com dados de saúde, a segurança foi considerada desde
+> o início do projeto.
 
-### 0:25–0:55 — arquitetura modular e aplicação funcionando
+### 0:25–0:50 — organização e aplicação funcionando
 
 **Tela:** árvore de `app/`, destacando `routes`, `models`, `schemas`, `services`, `database` e
 `security`. Depois troque rapidamente para `/health` no navegador.
@@ -89,14 +108,13 @@ explicar cada linha do código.
 
 **Fala:**
 
-> A aplicação foi construída em FastAPI e separada em rotas, modelos, schemas, serviços, banco de
-> dados e segurança. Essa divisão evita concentrar regras em um único arquivo e permite testar cada
-> responsabilidade. Aqui o servidor Uvicorn está em execução, e o endpoint de saúde confirma que a
-> API está disponível.
+> Eu usei FastAPI e separei o projeto em rotas, modelos, validações, serviços, banco de dados e
+> segurança. Isso deixa o código mais organizado e evita repetir regras. Aqui o servidor está
+> funcionando, e esta resposta confirma que a API está disponível.
 
 **Resultado visível esperado:** `{"status":"ok"}`.
 
-### 0:55–1:30 — entrada, saída, persistência e XSS
+### 0:50–1:30 — proteção dos dados
 
 **Tela:** `app/schemas/appointment.py`, deixando visíveis `AppointmentCreate`,
 `AppointmentUpdate`, `AppointmentRead`, `extra="forbid"` e `SAFE_NOTES_PATTERN`.
@@ -105,31 +123,29 @@ explicar cada linha do código.
 
 **Fala:**
 
-> Nos schemas Pydantic, a entrada usa whitelist, regex, limites e `extra forbid`, portanto campos
-> não declarados são rejeitados. O `AppointmentRead` é o response model e contém somente os campos
-> autorizados. Sem esse contrato, campos internos do modelo persistido poderiam vazar na resposta.
-> A persistência usa SQLModel, sessão por injeção de dependência e consultas parametrizadas. Ela
-> também rejeita com status 409 um choque de horário do profissional ou do paciente. Na agenda
-> HTML, Jinja2 usa herança e autoescape, transformando uma tentativa de script em texto e impedindo
-> stored XSS.
+> Aqui ficam as regras dos dados de entrada e saída. Campos desconhecidos são recusados e as
+> observações aceitam somente caracteres permitidos. O response model funciona como uma lista dos
+> campos que podem aparecer na resposta. Assim, informações internas não são expostas. O banco é
+> acessado pelo SQLModel, sem montar comandos SQL com texto recebido do usuário. O sistema também
+> impede que um profissional ou paciente tenha duas consultas no mesmo horário e responde com o
+> código 409. Na página da recepção, textos perigosos são exibidos como texto comum, em vez de serem
+> executados pelo navegador.
 
-### 1:30–2:10 — autenticação, autorização e integração M2M
+### 1:30–2:10 — login e permissões
 
-**Tela:** primeiro `app/security/authentication.py`; depois `app/security/authorization.py`.
+**Tela:** `app/security/authorization.py`, perto de `authorize_appointment`.
 
-**Ação:** em `authentication.py`, aponte `OAuth2PasswordBearer` e os escopos. Em
-`authorization.py`, aponte `authorize_appointment`.
+**Ação:** aponte a função que compara o usuário com a consulta.
 
 **Fala:**
 
-> Para usuários humanos, implementei OAuth2 Password, senhas com hash bcrypt e JWT com expiração,
-> issuer e audience. Administradores precisam de um MFA simulado. A autorização combina RBAC com
-> ownership: o papel define a capacidade geral, mas um profissional só acessa as consultas ligadas
-> ao próprio identificador. Isso corrige BOLA, porque trocar o ID na URL não concede acesso. Para o
-> laboratório, escolhi Client Credentials, próprio para máquina a máquina. O token recebe o tipo
-> `service` e somente o escopo `availability read`, sem acesso ao CRUD clínico.
+> O login usa OAuth2, as senhas são protegidas com bcrypt e o token JWT possui tempo de validade.
+> Administradores também precisam de uma segunda verificação simulada. As permissões consideram o
+> papel do usuário e o dono da consulta. Por isso, um profissional não consegue acessar a consulta
+> de outro apenas trocando o código na URL. O laboratório usa um login separado para sistemas e só
+> pode consultar horários disponíveis. Ele não pode acessar as consultas dos pacientes.
 
-### 2:10–2:40 — ameaça, OWASP e hardening
+### 2:10–2:40 — análise de ameaças
 
 **Tela:** `docs/threat_model.md`; use a busca do editor por `TM-01` e depois por `TM-08`.
 
@@ -137,12 +153,12 @@ explicar cada linha do código.
 
 **Fala:**
 
-> O threat model foi construído com DFD, trust boundaries, misuse cases e STRIDE. Eu rastreei
-> ameaças como BOLA, brute force, confusão entre token humano e de serviço, mass assignment e XSS.
-> As mitigações incluem ownership central, validação fechada, revogação pelo estado atual, CORS com
-> allowlist, CSP, HSTS, proteção contra frames, `nosniff` e rate limiting mais restritivo no login.
+> Também fiz uma análise de ameaças usando STRIDE e as categorias da OWASP. Eu considerei riscos
+> como acesso à consulta de outra pessoa, tentativas repetidas de login, envio de campos escondidos
+> e scripts maliciosos. Para reduzir esses riscos, usei a verificação do dono da consulta,
+> validações, limite de requisições, origens permitidas e cabeçalhos de segurança.
 
-### 2:40–3:10 — demonstração rápida de proteção da rota
+### 2:40–3:10 — demonstração no Swagger
 
 **Tela:** Swagger em `http://127.0.0.1:8000/docs`.
 
@@ -151,32 +167,28 @@ autorizar. Mostre a resposta `401` e os códigos `401`, `403` e `429` documentad
 
 **Fala:**
 
-> A documentação OpenAPI apresenta as rotas e os controles esperados. Nesta demonstração, uma
-> tentativa anônima de listar consultas retorna 401. As respostas 403 e 429 também fazem parte do
-> contrato: 403 representa autenticação válida sem autorização suficiente, e 429 representa o
-> bloqueio por excesso de requisições.
+> Esta é a documentação automática da API. Vou tentar listar as consultas sem fazer login. O
+> sistema responde 401, porque não sabe quem está fazendo o pedido. O código 403 é usado quando a
+> pessoa está identificada, mas não tem permissão. O código 429 aparece quando alguém faz
+> requisições demais.
 
 **Resultado visível esperado:** status `401`, normalmente com `{"detail":"Not authenticated"}`.
 
-### 3:10–3:50 — testes, pipeline e critério do security gate
+### 3:10–3:50 — testes e bloqueio de segurança
 
-**Tela:** execução final do GitHub Actions, com os cinco jobs verdes. Em seguida, mostre
-`.github/workflows/security.yml`.
+**Tela:** execução final do GitHub Actions, com os cinco trabalhos verdes.
 
-**Ação:** aponte os jobs Tests, Bandit, Trivy, ZAP e Security gate.
+**Ação:** aponte Tests, Bandit, Trivy, ZAP e Security gate. Não abra os detalhes.
 
 **Fala:**
 
-> A suíte final tem 36 testes e 95,02 por cento de cobertura. Há testes funcionais, regressões de
-> segurança e testes com mocking, que provam que uma entrada inválida não chega ao serviço e que
-> uma autorização negada impede a mutação. No pipeline, testes e auditoria OpenAPI, SAST com
-> Bandit, análise de dependências com Trivy e DAST passivo com ZAP executam antes do gate. Eu defini
-> que vulnerabilidades altas ou críticas bloqueiam, assim como achados médios confiáveis de SAST e
-> qualquer falha que permita acesso indevido a dados de saúde. O impacto de negócio pode elevar o
-> bloqueio mesmo quando o score técnico isolado não seria alto. O check `Security gate` é obrigatório
-> na branch principal, então uma falha impede o merge.
+> O projeto possui 36 testes e 95,02 por cento de cobertura. No GitHub, os testes, o Bandit, o
+> Trivy e o ZAP verificam o projeto automaticamente. O Security Gate reúne esses resultados. Eu
+> decidi bloquear o código quando existe uma falha alta ou crítica, uma falha média confiável no
+> código, ou qualquer problema que possa expor dados de saúde. Esse controle é obrigatório. Se uma
+> dessas verificações falhar, o código não pode ser unido à versão principal.
 
-### 3:50–4:25 — capstone, OpenAPI e OWASP ZAP
+### 3:50–4:20 — auditoria final
 
 **Tela:** `docs/evidencias/etapa_6.md` ou a seção 6/7 do relatório PDF, com o antes e depois do ZAP.
 
@@ -184,13 +196,12 @@ autorizar. Mostre a resposta `401` e os códigos `401`, `403` e `429` documentad
 
 **Fala:**
 
-> No capstone, a auditoria automatizada do OpenAPI aprovou seis de seis controles, incluindo
-> escopos, respostas de segurança e ausência de campos internos. O primeiro scan passivo do ZAP
-> encontrou dois alertas médios e cinco baixos na interface Swagger. Eu corrigi CSP, integridade
-> SRI, versões externas, políticas cross-origin, permissões e cache. A segunda execução ficou com
-> zero alertas altos, médios ou baixos; restaram somente duas observações informativas.
+> Na auditoria final, o contrato OpenAPI passou em seis de seis verificações. A primeira análise do
+> ZAP encontrou dois alertas médios e cinco baixos na página do Swagger. Depois das correções de
+> segurança do navegador, a nova análise ficou sem alertas altos, médios ou baixos. Restaram apenas
+> duas informações que não representam vulnerabilidades.
 
-### 4:25–4:55 — risco residual e decisão de deploy
+### 4:20–4:45 — decisão final
 
 **Tela:** última página de `docs/relatorio_tecnico_final.pdf`, seção “Riscos residuais e decisão de
 deploy”.
@@ -199,13 +210,13 @@ deploy”.
 
 **Fala:**
 
-> Mesmo com o pipeline aprovado, eu liberaria esta versão somente para avaliação acadêmica e
-> ambiente local controlado. Eu bloquearia produção até comprovar TLS na borda, banco gerenciado e
-> criptografado, cofre e rotação de segredos, rate limiting distribuído, MFA real, auditoria
-> imutável e backup restaurável. Essa decisão é conservadora porque dados de saúde aumentam o
-> impacto de qualquer falha residual.
+> Mesmo com todas as verificações aprovadas, eu liberaria esta versão somente para avaliação e uso
+> local. Para usar em produção, ainda seriam necessários HTTPS comprovado, banco criptografado,
+> proteção profissional dos segredos, segunda verificação real, registros que não possam ser
+> apagados e testes de backup. Como o sistema trata dados de saúde, é melhor manter uma decisão mais
+> cuidadosa.
 
-### 4:55–5:00 — encerramento
+### 4:45–4:50 — encerramento
 
 **Tela:** capa do relatório ou raiz do projeto.
 
